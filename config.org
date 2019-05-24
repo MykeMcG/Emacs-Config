@@ -2,40 +2,68 @@
 #+AUTHOR: Mike McGivern
 
 * User Variables
-
 #+BEGIN_SRC emacs-lisp
+(setq change-log-default-name "CHANGELOG")
 (setq add-log-full-name "Mike McGivern")
 (setq add-log-mailing-address "myke.mcg@protonmail.com")
-(setq syncthing-root "C:/users/mike/public documents")
+(setq user-data-root "G:")
+#+END_SRC
+
+* The Most Important Settings
+#+BEGIN_SRC emacs-lisp
+(setq-default indent-tabs-mode nil); Disable tabs
+(setq tab-stop-list (number-sequence 4 120 4)); Generate a new list of tab stops
+(define-key text-mode-map (kbd "<tab>") 'tab-to-tab-stop); Rebind the TAB key
 #+END_SRC
 
 * Interface
 
 ** GUI Mode
-
 #+BEGIN_SRC emacs-lisp
 (add-to-list 'custom-theme-load-path "~/dotfiles/emacs themes")
 (when window-system
   (tool-bar-mode -1)
   (menu-bar-mode -1)
   (scroll-bar-mode -1)
-  (set-face-attribute 'default nil :font "MonteCarlo:pixelsize=11:antialias=true:hinting=false")
-  (load-theme `cyberpunk-2019 t)
+  (set-face-attribute 'default nil :font "Input:pixelsize=12")
+  (load-theme `green-orange t)
   (setq mouse-autoselect-window t))
 #+END_SRC
 
 ** General
-
 #+BEGIN_SRC emacs-lisp
-(desktop-save-mode 1)
 (setq inhibit-startup-screen t)
 (setq ring-bell-function 'ignore)
 (defalias 'yes-or-no-p 'y-or-n-p)
 (show-paren-mode 1)
 #+END_SRC
 
-* Backup 
+** NeoTree
+#+BEGIN_SRC emacs-lisp
+(use-package neotree
+  :ensure t
+  :config
+  (setq neo-theme 'ascii)
+  (global-set-key [f8] 'neotree-toggle))
+#+END_SRC
 
+** Company
+#+BEGIN_SRC emacs-lisp
+(use-package company
+  :ensure t)
+#+END_SRC
+
+** Emacs Dashboard
+#+BEGIN_SRC emacs-lisp
+(use-package dashboard
+  :ensure t
+  :config
+  (dashboard-setup-startup-hook)
+  (setq dashboard-startup-banner 'logo)
+  (setq dashboard-center-content t))
+#+END_SRC
+
+* Backup 
 #+BEGIN_SRC emacs-lisp
 (setq backup-directory-alist '(("." . "~/.emacs.d/backup"))
   backup-by-copying t
@@ -47,19 +75,17 @@
 
 * Custom 
 Stop Emacs' Custom module from adding its weird garbage to my config file
-
 #+BEGIN_SRC emacs-lisp
 (setq custom-file "~/dotfiles/custom.el")
 (load custom-file 'noerror)
 #+END_SRC
 
 * Orgmode
-
 #+BEGIN_SRC emacs-lisp
 (setq org-capture-templates
-  '(("i" "Inbox" entry (file (concat syncthing-root "/orgfiles/inbox.org"))
+  '(("i" "Inbox" entry (file (concat user-data-root "/Notes/inbox.org"))
     "* %?\n  %i\n  %a\nAdded: %U")))
-(setq org-archive-location (concat syncthing-root "/orgfiles/archivehive.org"))
+(setq org-archive-location (concat user-data-root "/Notes/archive.org"))
 (setq org-refile-targets
   '((nil :maxlevel . 3)
     (org-agenda-files :maxlevel . 3)))
@@ -70,49 +96,33 @@ Stop Emacs' Custom module from adding its weird garbage to my config file
 (global-set-key "\C-ca" 'org-agenda)
 #+END_SRC
 
-* CSS
-
-#+BEGIN_SRC emacs-lisp
-(setq css-indent-offset 2)
-#+END_SRC
-
-* Javascript
-
-#+BEGIN_SRC emacs-lisp
-(use-package js2-mode
-  :ensure t
-  :mode "\\.js\\'"
-  :config
-  (setq-default js-indent-level 2)
-  (setq-default js2-basic-offset 2)
-  (setq js2-strict-missing-semi-warning nil)
-  (setq js2-basic-offset 2))
-#+END_SRC
-
 * YASnippet
-
 #+BEGIN_SRC emacs-lisp
 (use-package yasnippet
   :ensure t
   :config
   (yas-global-mode 1)
-  (setq yas-snippet-dirs
-    (concat syncthing-root "/snippets")))
+  (setq yas-snippet-dirs (concat user-data-root "/snippets")))
 #+END_SRC
 
-* Changelog
+* Language-Specific
 
+** Javascript
 #+BEGIN_SRC emacs-lisp
-(setq change-log-default-name "CHANGELOG")
+(use-package js2-mode
+  :ensure t
+  :mode "\\.js\\'")
 #+END_SRC
 
-* Clojure
-
+** OmniSharp
 #+BEGIN_SRC emacs-lisp
-(use-package clojure-mode
-  :ensure t)
-(use-package cider
+(use-package omnisharp
   :ensure t
   :config
-  (setq exec-path (append exec-path '("C:/CLI Tools"))))
-#+END_SRC
+  (add-hook 'csharp-mode-hook 'omnisharp-mode)
+  (with-eval-after-load 'company
+    '(add-to-list 'company-backends 'company-omnisharp)
+    ;(define-key company-active-map (kbd "C-SPC") #'company-complete-common)
+    (global-set-key (kbd "C-SPC") 'company-complete-common)
+  (add-hook 'csharp-mode-hook #'company-mode)))
+#+END_SRC 
