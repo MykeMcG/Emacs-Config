@@ -15,7 +15,6 @@
 (setq tab-stop-list (number-sequence 4 120 4)); Generate a new list of tab stops
 (define-key text-mode-map (kbd "<tab>") 'tab-to-tab-stop); Rebind the TAB key
 #+END_SRC
-
 * Interface
 
 ** GUI Mode
@@ -36,6 +35,7 @@
 (setq ring-bell-function 'ignore)
 (defalias 'yes-or-no-p 'y-or-n-p)
 (show-paren-mode 1)
+(global-display-line-numbers-mode)
 #+END_SRC
 
 ** NeoTree
